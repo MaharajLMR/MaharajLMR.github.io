@@ -14,7 +14,11 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
-const updated = new Date().toISOString().slice(0, 10);
+const updated = new Date().toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.seo.url),

@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import Button from './Button';
 import CopyEmail from './CopyEmail';
 import Reveal from './Reveal';
@@ -32,9 +34,9 @@ export default function Contact({ site }: { site: Site }) {
             </a>
           </li>
           <li>
-            <Button href="/resume/" variant="text">
+            <Link className="text-body text-accent underline-offset-4 hover:underline" href="/resume/">
               Resume
-            </Button>
+            </Link>
           </li>
         </ul>
       </Reveal>

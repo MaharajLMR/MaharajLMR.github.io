@@ -15,7 +15,7 @@
     "Every number on this site comes from a script or a recorded run in the matching repository. Where a dimension is estimated or a system has only ever run in simulation, the page says so.",
     "From November 2026 I am a research intern on parallel robots at IIT Madras. I am looking for robotics, ROS 2 and autonomy engineering roles in Bengaluru, Chennai, Hyderabad or remote."
   ],
-  "lookingFor": "Robotics, ROS 2 and autonomy engineering roles - Bengaluru, Chennai, Hyderabad or remote.",
+  "lookingFor": "Robotics, ROS 2 and autonomy engineering roles — Bengaluru, Chennai, Hyderabad or remote.",
   "location": "Chennai, India",
   "email": "lmrrajan2005@gmail.com",
   "github": "https://github.com/MaharajLMR",
@@ -26,7 +26,7 @@
     {
       "degree": "BE Mechatronics Engineering",
       "institution": "Chennai Institute of Technology, Chennai",
-      "period": "2024 - 2028",
+      "period": "2024 – 2028",
       "detail": "CGPA 7.7"
     }
   ],
@@ -40,7 +40,7 @@
     {
       "role": "Research Intern, Robotics and AI",
       "org": "National Institute of Technology Calicut",
-      "period": "May - September 2026",
+      "period": "May – September 2026",
       "detail": "Four-month research internship building robotic applications on a Hiwonder JetAcker kit with NVIDIA Jetson: ROS 1 and ROS 2, Gazebo, SLAM, computer vision, voice control and multimodal AI. Worked on autonomous navigation, sensor integration and robot software."
     },
     {
@@ -52,7 +52,7 @@
     {
       "role": "Intern, Manufacturing and Production",
       "org": "Lakshmi Engineering",
-      "period": "May - June 2025",
+      "period": "May – June 2025",
       "detail": "Two months on machining, mechanical assembly and fabrication of precision components, with quality inspection and CNC machining practice."
     }
   ],
@@ -129,7 +129,7 @@
     }
   ],
   "seo": {
-    "title": "Maharaj L M R - Robotics and ROS 2 engineer",
+    "title": "Maharaj L M R — Robotics and ROS 2 engineer",
     "description": "ROS 2 and simulation engineer. Multi-robot traffic control for a five-AGV warehouse fleet, a CNC lathe loading arm, and closed-form delta kinematics. Every number traces to a script in the repo.",
     "url": "https://maharajlmr.github.io"
   },
@@ -138,6 +138,6 @@
     "src": "/media/hero_backdrop.webp",
     "alt": "",
     "width": 1200,
-    "height": 720
+    "height": 562
   }
 }

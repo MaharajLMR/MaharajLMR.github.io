@@ -23,12 +23,12 @@
           "why": "Nav2 is good at driving a lane and blind to the fleet. Handing it a single lane keeps conflict resolution in one place. The tradeoff is a central point of failure, which the README states: if the fleet manager dies, the reservations die with it."
         },
         {
-          "decision": "A robot reserves the aisle in both directions, the junction at the far end, and the station beyond it if that station is a dead end - all atomically or not at all.",
+          "decision": "A robot reserves the aisle in both directions, the junction at the far end, and the station beyond it if that station is a dead end — all atomically or not at all.",
           "why": "A robot queueing outside a dead-end station traps the robot inside it. Dropping dead-end claiming still completes every order but raises deadlocks from 76 to 113 per 100 orders."
         },
         {
           "decision": "Rebuild the wait-for graph every 0.25 s, find the cycle, and score free neighbouring junctions to pick one robot that steps aside.",
-          "why": "I had written down a proof that one-lane-at-a-time reservations made deadlock impossible. It was wrong - a robot also occupies a junction - and a randomised stress test found a head-on deadlock in seconds. The scoring rules (avoid dead ends, avoid other robots' routes, prefer cycle members, shortest move) each came from a specific failure."
+          "why": "I had written down a proof that one-lane-at-a-time reservations made deadlock impossible. It was wrong — a robot also occupies a junction — and a randomised stress test found a head-on deadlock in seconds. The scoring rules (avoid dead ends, avoid other robots' routes, prefer cycle members, shortest move) each came from a specific failure."
         },
         {
           "decision": "Port the traffic manager to C++17 behind pybind11, with integer node ids and flat arrays.",
@@ -194,24 +194,24 @@
             "src": "/media/resilient-agv-fleet/fleet_baselines.webp",
             "alt": "Bar chart comparing the full system against three ablations",
             "caption": "Ablations over 240,000 randomised orders: remove deadlock resolution and every run freezes; remove reservations and robots overlap half the time.",
-            "width": 1300,
-            "height": 416
+            "width": 1600,
+            "height": 469
           },
           {
             "type": "image",
             "src": "/media/resilient-agv-fleet/traffic_speed.webp",
             "alt": "Route planning time, Python against C++, over graph size",
             "caption": "Route planning time against graph size. The C++ port holds about 55x over the Python reference it is parity-tested against.",
-            "width": 832,
-            "height": 416
+            "width": 1139,
+            "height": 638
           },
           {
             "type": "image",
             "src": "/media/resilient-agv-fleet/fleet_scaling.webp",
             "alt": "Throughput and waiting share against fleet size",
             "caption": "Throughput flattens as robots are added: at five, 31 % of their time is spent waiting for each other.",
-            "width": 832,
-            "height": 442
+            "width": 1203,
+            "height": 647
           },
           {
             "type": "image",
@@ -285,7 +285,7 @@
         },
         {
           "decision": "Insert with a base swing, with the lathe standing side-on and the wrist rolled a quarter turn first.",
-          "why": "The base swing is the only motion that is horizontal and keeps the gripper level, so it is the only one that can push a billet along a horizontal spindle. The billet lies radially on the tray because that is the only way the fingers close across it, so the wrist rolls 90 degrees - exactly its range - before the arm goes near the machine."
+          "why": "The base swing is the only motion that is horizontal and keeps the gripper level, so it is the only one that can push a billet along a horizontal spindle. The billet lies radially on the tray because that is the only way the fingers close across it, so the wrist rolls 90 degrees — exactly its range — before the arm goes near the machine."
         },
         {
           "decision": "Solve the two insertion points as Cartesian targets instead of as a yaw offset.",
@@ -596,7 +596,7 @@
       "failures": [
         {
           "what": "The first inverse kinematics used only the radial projection of the wrist offset and ignored the tangential component, so off-axis targets were about 3.8 mm out while on-axis ones looked perfect.",
-          "fix": "The parallelogram forearm swings tangentially, so the effective length in the radial plane is sqrt(Lf^2 - tau^2). With that correction the round-trip error dropped to floating-point noise, and a 10,000-point round-trip test now guards it."
+          "fix": "The parallelogram forearm swings tangentially, so the effective length in the radial plane is sqrt(Lf^2 — tau^2). With that correction the round-trip error dropped to floating-point noise, and a 10,000-point round-trip test now guards it."
         },
         {
           "what": "Forward kinematics sometimes returned the mirror solution, the one with the arm above the base plate.",
@@ -637,8 +637,8 @@
             "src": "/media/delta-parallel-kinematics/solver_benchmark.webp",
             "alt": "Solve time distribution for the analytical and numerical solvers",
             "caption": "Closed form against scipy fsolve on the same 1,000 targets: 6.2 us in Python, 0.21 us in C++, 100.1 us numerical.",
-            "width": 1600,
-            "height": 664
+            "width": 1363,
+            "height": 567
           },
           {
             "type": "image",
