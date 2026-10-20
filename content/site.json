@@ -1,0 +1,136 @@
+{
+  "name": "Maharaj L M R",
+  "roleLine": "Mechatronics engineer - ROS 2, control and simulation",
+  "identityLine": "I build ROS 2 systems for robots that have to share space and keep working: a five-AGV fleet that clears its own deadlocks, a jib arm that loads a lathe chuck, and the kinematics underneath them.",
+  "proofStrip": [
+    "ROS 2 Jazzy",
+    "Nav2",
+    "C++17",
+    "Gazebo Harmonic",
+    "Embedded"
+  ],
+  "bio": [
+    "I am a third-year BE Mechatronics student at Chennai Institute of Technology. Most of my work is ROS 2 simulation and the maths under mobile robots and arms.",
+    "Two of the projects here started as hackathon robots: a warehouse AGV (2nd runner-up, Bonfiglioli x CIT 2026) and a CNC lathe loading arm (1st runner-up, DriveNext RANE 2026). I rebuilt both in simulation afterwards so the behaviour could be measured instead of described.",
+    "Every number on this site comes from a script or a recorded run in the matching repository. Where a dimension is estimated or a system has only ever run in simulation, the page says so.",
+    "From November 2026 I am a research intern on parallel robots at IIT Madras. I am looking for robotics, ROS 2 and autonomy engineering roles in Bengaluru, Chennai, Hyderabad or remote."
+  ],
+  "lookingFor": "Robotics, ROS 2 and autonomy engineering roles - Bengaluru, Chennai, Hyderabad or remote.",
+  "location": "Chennai, India",
+  "email": "lmrrajan2005@gmail.com",
+  "github": "https://github.com/MaharajLMR",
+  "linkedin": "https://linkedin.com/in/maharaj-lmr",
+  "resumePdf": "/resume.pdf",
+  "avatar": "/media/avatar.jpg",
+  "education": [
+    {
+      "degree": "BE Mechatronics Engineering",
+      "institution": "Chennai Institute of Technology, Chennai",
+      "period": "2024 - 2028",
+      "detail": "CGPA 7.7"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Research Intern, Parallel Robotics",
+      "org": "Indian Institute of Technology Madras",
+      "period": "From November 2026",
+      "detail": "Incoming research intern on a parallel robotics project."
+    },
+    {
+      "role": "Research Intern, Robotics and AI",
+      "org": "National Institute of Technology Calicut",
+      "period": "May - September 2026",
+      "detail": "Four-month research internship building robotic applications on a Hiwonder JetAcker kit with NVIDIA Jetson: ROS 1 and ROS 2, Gazebo, SLAM, computer vision, voice control and multimodal AI. Worked on autonomous navigation, sensor integration and robot software."
+    },
+    {
+      "role": "Trainee, Mechanical and Electronics",
+      "org": "Chennai Port Authority",
+      "period": "November 2025",
+      "detail": "Studied Caterpillar 3412 locomotive diesel engines, traction and cooling systems, battery management, and mechanical to electrical power conversion for traction motors."
+    },
+    {
+      "role": "Intern, Manufacturing and Production",
+      "org": "Lakshmi Engineering",
+      "period": "May - June 2025",
+      "detail": "Two months on machining, mechanical assembly and fabrication of precision components, with quality inspection and CNC machining practice."
+    }
+  ],
+  "achievements": [
+    {
+      "title": "2nd runner-up, Bonfiglioli x CIT 48-hour Hackathon 2026",
+      "detail": "Automated guided vehicle for warehouse automation, among more than 1,000 teams. Prize 1,00,000 rupees.",
+      "project": "resilient-agv-fleet"
+    },
+    {
+      "title": "1st runner-up, DriveNext RANE SLD Hackathon 2026",
+      "detail": "5-DOF robotic arm for low-cost CNC lathe loading and unloading. Prize 75,000 rupees.",
+      "project": "cnc-lathe-arm"
+    },
+    {
+      "title": "Smart India Hackathon 2025, institutional round selection",
+      "detail": "Selected to present the agricultural multi-function robot.",
+      "project": "agricultural-multi-function-robot"
+    }
+  ],
+  "skills": [
+    {
+      "group": "Robotics & Control",
+      "items": [
+        "ROS 2 Jazzy",
+        "Nav2 (AMCL, NavFn, DWB)",
+        "ros2_control",
+        "Gazebo Harmonic",
+        "URDF / xacro / SDF",
+        "tf2",
+        "Multi-robot namespacing",
+        "Closed-form IK and FK",
+        "Analytical Jacobians and singularity checks",
+        "Trajectory profiling (trapezoidal, minimum jerk)",
+        "Multi-robot traffic control and deadlock resolution"
+      ]
+    },
+    {
+      "group": "Perception & AI",
+      "items": [
+        "2D lidar sensing and mounting",
+        "OpenCV",
+        "YOLOv8 detection pipelines",
+        "Severity scoring and active learning",
+        "Grad-CAM overlays"
+      ]
+    },
+    {
+      "group": "Embedded & Hardware",
+      "items": [
+        "Raspberry Pi 5",
+        "ADS1115 ADC over I2C",
+        "Potentiometer and servo interfacing",
+        "Linear actuator sizing",
+        "Arduino and ESP32",
+        "SolidWorks",
+        "MELFA RV-4F-LD operation and RT ToolBox"
+      ]
+    },
+    {
+      "group": "Tools",
+      "items": [
+        "C++17",
+        "Python",
+        "pybind11",
+        "pytest and GoogleTest",
+        "GitHub Actions CI",
+        "Docker",
+        "FastAPI",
+        "Matplotlib",
+        "ffmpeg",
+        "Git"
+      ]
+    }
+  ],
+  "seo": {
+    "title": "Maharaj L M R - Robotics and ROS 2 engineer",
+    "description": "ROS 2 and simulation engineer. Multi-robot traffic control for a five-AGV warehouse fleet, a CNC lathe loading arm, and closed-form delta kinematics. Every number traces to a script in the repo.",
+    "url": "https://maharajlmr.github.io"
+  }
+}

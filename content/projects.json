@@ -1,0 +1,887 @@
+{
+  "featured": [
+    {
+      "slug": "resilient-agv-fleet",
+      "title": "Resilient Warehouse AGV Fleet",
+      "tagline": "Five AGVs share one-robot aisles without deadlock",
+      "category": "Robotics & Control",
+      "featured": true,
+      "rank": 1,
+      "date": "2026-10",
+      "timeline": "Sep–Oct 2026",
+      "oneLineProblem": "In aisles that fit one robot, two AGVs meeting head-on have nowhere to go, so Nav2 cannot solve it.",
+      "problem": "Five AGVs work a 40 x 30 m warehouse where the aisles are only wide enough for one robot. Nav2's local avoidance assumes there is room to swerve; in a one-robot aisle there is none, so two robots meeting head-on simply stop. Something above the planner has to decide who enters which aisle, notice when robots are waiting on each other in a circle, and keep the orders moving when a robot breaks down or the warehouse management system drops off the network.",
+      "constraints": [
+        "Aisles are one robot wide, so conflicts cannot be resolved locally.",
+        "One laptop runs Gazebo Harmonic plus five full Nav2 stacks: AMD Ryzen 7 3750H, 15 GB RAM, GTX 1650.",
+        "Real-time factor started at 0.39 with five idle robots, which caps how long a demo run can be.",
+        "The warehouse layout, the Gazebo world and the Nav2 map all have to come from one file or they disagree."
+      ],
+      "approach": [
+        {
+          "decision": "The fleet manager owns routing and gives Nav2 one lane at a time.",
+          "why": "Nav2 is good at driving a lane and blind to the fleet. Handing it a single lane keeps conflict resolution in one place. The tradeoff is a central point of failure, which the README states: if the fleet manager dies, the reservations die with it."
+        },
+        {
+          "decision": "A robot reserves the aisle in both directions, the junction at the far end, and the station beyond it if that station is a dead end - all atomically or not at all.",
+          "why": "A robot queueing outside a dead-end station traps the robot inside it. Dropping dead-end claiming still completes every order but raises deadlocks from 76 to 113 per 100 orders."
+        },
+        {
+          "decision": "Rebuild the wait-for graph every 0.25 s, find the cycle, and score free neighbouring junctions to pick one robot that steps aside.",
+          "why": "I had written down a proof that one-lane-at-a-time reservations made deadlock impossible. It was wrong - a robot also occupies a junction - and a randomised stress test found a head-on deadlock in seconds. The scoring rules (avoid dead ends, avoid other robots' routes, prefer cycle members, shortest move) each came from a specific failure."
+        },
+        {
+          "decision": "Port the traffic manager to C++17 behind pybind11, with integer node ids and flat arrays.",
+          "why": "Python planning cost 4.6 ms on a 1,600-junction graph, which is too slow to run every tick for every robot. The first port kept string keys in std::map and was only 1.5x faster; integer ids made it ~55x. A parity test runs both versions through the same random scenarios so they cannot drift apart."
+        },
+        {
+          "decision": "A robot only accepts an order if its battery covers pick, drop and the trip to the nearest charger with 10 % to spare.",
+          "why": "A robot that runs flat mid-aisle blocks the aisle for everyone else. Below 30 % it finishes its order and goes to charge."
+        }
+      ],
+      "architecture": {
+        "summary": "One layout file generates the lane graph, the Gazebo world and the Nav2 map. The fleet manager allocates orders, plans routes on the graph and grants lane reservations through the C++ traffic manager; each robot runs its own namespaced Nav2 stack and only ever receives a goal one lane away.",
+        "stages": [
+          {
+            "title": "Orders",
+            "items": [
+              "Mock WMS (can be cut)",
+              "Order queue, buffered during outages"
+            ]
+          },
+          {
+            "title": "Fleet manager",
+            "items": [
+              "Allocator: nearest free robot by route length",
+              "Battery gate: pick + drop + charger + 10 %",
+              "Dijkstra route on the lane graph",
+              "agv_traffic (C++17, pybind11): reservations + wait-for cycles"
+            ]
+          },
+          {
+            "title": "Per robot",
+            "items": [
+              "Namespaced Nav2: AMCL, NavFn, DWB",
+              "One lane goal at a time",
+              "Front and rear lidars at 20 cm"
+            ]
+          },
+          {
+            "title": "World",
+            "items": [
+              "Gazebo Harmonic: 5 AGVs, forklift, 2 walking actors",
+              "Warehouse world and Nav2 map generated from layout.py"
+            ]
+          },
+          {
+            "title": "Output",
+            "items": [
+              "Web dashboard on :8080",
+              "KPI log to report plots"
+            ]
+          }
+        ]
+      },
+      "results": [
+        {
+          "label": "Orders completed, full system",
+          "value": "100",
+          "unit": "%",
+          "context": "0.6 % with deadlock resolution switched off, where 100 % of runs freeze. 240,000 randomised orders, 800 seeds.",
+          "headline": true
+        },
+        {
+          "label": "Route planning, C++ vs Python",
+          "value": "55",
+          "unit": "x faster",
+          "context": "82 us against 4,562 us on a 1,600-junction graph; 53x at 100 junctions. Decisions parity-tested as identical.",
+          "headline": true
+        },
+        {
+          "label": "Junction and aisle conflicts",
+          "value": "0",
+          "unit": "per 1,000 ticks",
+          "context": "502 per 1,000 ticks with reservations removed.",
+          "headline": true
+        },
+        {
+          "label": "Deadlocks detected and cleared",
+          "value": "76.2",
+          "unit": "per 100 orders",
+          "context": "At five robots. 112.7 without dead-end claiming, which is why that rule stayed."
+        },
+        {
+          "label": "Throughput lost to a broken robot",
+          "value": "10",
+          "unit": "%",
+          "context": "No orders lost and no frozen runs across the breakdown study."
+        },
+        {
+          "label": "Time five robots spend waiting on each other",
+          "value": "31",
+          "unit": "%",
+          "context": "0 % at one robot, 7 % at two, 15 % at three, 23 % at four. This is the cost of one-robot aisles, not a bug."
+        },
+        {
+          "label": "Deliveries in a 10-minute Gazebo run",
+          "value": "9",
+          "unit": "",
+          "context": "Five deadlocks resolved, five self-chosen charge trips, zero navigation failures, one order buffered through an 85 s WMS outage, at about 0.4x real time."
+        },
+        {
+          "label": "AMCL position error after a 14 m drive",
+          "value": "1.6",
+          "unit": "cm",
+          "context": "Against Gazebo ground truth."
+        }
+      ],
+      "failures": [
+        {
+          "what": "I proved deadlock was impossible. The proof ignored that a robot also occupies the junction it stands on, so two robots facing each other in a corridor deadlock immediately.",
+          "fix": "A randomised stress test found it in seconds. Added wait-for graph cycle detection every 0.25 s with a scored step-aside."
+        },
+        {
+          "what": "The first step-aside rule moved a robot into a dead end, which trapped it. Moving it onto another involved robot's route recreated the same cycle one step later.",
+          "fix": "Candidate junctions are now scored: not a dead end, not on another involved robot's route, prefer moving a cycle member, shortest move. Each rule came from a stress-test failure."
+        },
+        {
+          "what": "A robot that broke down and gave up its order kept the advance claim on the station it was driving to, so that station was locked for the rest of the run.",
+          "fix": "Every re-route now drops all claims except the spot the robot is physically on."
+        },
+        {
+          "what": "The first C++ port was only 1.5x faster than Python because it looked nodes up by string and rebuilt the blocked set on every call.",
+          "fix": "Integer node ids in flat arrays, ids assigned alphabetically so Dijkstra tie-breaks match the Python reference exactly."
+        },
+        {
+          "what": "With lidars at 15 cm the robot saw its own wheels and Nav2's collision monitor refused to move it.",
+          "fix": "Lidars at 20 cm: below the deck so robots still see each other, above the wheels. Each covers 189 degrees, any wider and it clips its own corners."
+        },
+        {
+          "what": "Wheel joints were flipped, so the robot drove backwards while odometry reported forwards.",
+          "fix": "Caught by comparing against Gazebo ground truth, then pinned by a URDF test."
+        },
+        {
+          "what": "Killed runs left Fast DDS shared-memory files behind, which broke the next run. 3 MB camera frames were being dropped over DDS.",
+          "fix": "Launch scripts clean the files and use UDP; the recorder reads frames straight from Gazebo."
+        }
+      ],
+      "myRole": "Solo repository: the lane graph and layout generator, the allocator, the Python traffic manager and its C++17 port, deadlock detection, breakdown and battery handling, the WMS outage path, the Nav2 configuration and namespaced launch files, the dashboard, and the recording and report tooling. It grew out of my team's entry to the Bonfiglioli x CIT Smart Motion Hackathon 2026 (2nd runner-up, 1,00,000 rupees); this simulation is my own work written afterwards.",
+      "teamSize": 1,
+      "environment": "Simulation",
+      "status": "Complete",
+      "stack": [
+        "ROS 2 Jazzy",
+        "Nav2",
+        "C++17",
+        "pybind11",
+        "Gazebo Harmonic",
+        "Python",
+        "pytest",
+        "Docker"
+      ],
+      "media": {
+        "hero": {
+          "type": "video",
+          "src": "/media/resilient-agv-fleet/fleet_showcase.mp4",
+          "poster": "/media/resilient-agv-fleet/fleet_showcase_poster.jpg",
+          "alt": "Five AGVs driving a Gazebo warehouse with racks, a forklift and two walking workers",
+          "width": 1200,
+          "height": 720
+        },
+        "gallery": [
+          {
+            "type": "image",
+            "src": "/media/resilient-agv-fleet/fleet_baselines.webp",
+            "alt": "Bar chart comparing the full system against three ablations",
+            "caption": "Ablations over 240,000 randomised orders: remove deadlock resolution and every run freezes; remove reservations and robots overlap half the time.",
+            "width": 1300,
+            "height": 416
+          },
+          {
+            "type": "image",
+            "src": "/media/resilient-agv-fleet/traffic_speed.webp",
+            "alt": "Route planning time, Python against C++, over graph size",
+            "caption": "Route planning time against graph size. The C++ port holds about 55x over the Python reference it is parity-tested against.",
+            "width": 832,
+            "height": 416
+          },
+          {
+            "type": "image",
+            "src": "/media/resilient-agv-fleet/fleet_scaling.webp",
+            "alt": "Throughput and waiting share against fleet size",
+            "caption": "Throughput flattens as robots are added: at five, 31 % of their time is spent waiting for each other.",
+            "width": 832,
+            "height": 442
+          },
+          {
+            "type": "image",
+            "src": "/media/resilient-agv-fleet/deliveries.webp",
+            "alt": "Deliveries over time in the ten-minute Gazebo run",
+            "caption": "The ten-minute Gazebo run, including the WMS outage in the middle.",
+            "width": 1040,
+            "height": 416
+          },
+          {
+            "type": "image",
+            "src": "/media/resilient-agv-fleet/battery.webp",
+            "alt": "Battery level of five AGVs over the run",
+            "caption": "Five charge trips the robots decided on themselves.",
+            "width": 1040,
+            "height": 416
+          }
+        ]
+      },
+      "links": {
+        "repo": "https://github.com/MaharajLMR/resilient-agv-fleet"
+      },
+      "next": [
+        "Shard the fleet manager by zone so one process dying does not stop the floor.",
+        "Put the walking workers in the fleet manager's model instead of leaving them to each robot's lidar.",
+        "Run the traffic manager against a recorded real-warehouse order trace rather than random orders."
+      ],
+      "pinnedStory": [
+        {
+          "label": "Problem",
+          "title": "Aisles that fit one robot",
+          "body": "Nav2's local avoidance assumes there is room to swerve. In a one-robot aisle there is none, so two AGVs meeting head-on simply stop and the floor stops with them."
+        },
+        {
+          "label": "Approach",
+          "title": "Reserve, detect, step aside",
+          "body": "A robot takes the aisle, the junction at the far end and any dead-end station beyond it in one atomic claim. Every 0.25 s the manager rebuilds the wait-for graph, finds the cycle, and scores free junctions to pick the one robot that moves out of the way."
+        },
+        {
+          "label": "Result",
+          "title": "Every order still finishes",
+          "body": "100 % of orders complete across 240,000 randomised orders, against 0.6 % with deadlock resolution switched off, where every run freezes. Conflicts stay at zero per 1,000 ticks; without reservations they are 502."
+        }
+      ]
+    },
+    {
+      "slug": "cnc-lathe-arm",
+      "title": "5-Axis CNC Lathe Loading Arm",
+      "tagline": "Hackathon jib arm, remodelled to load a lathe",
+      "category": "Embedded & Hardware",
+      "featured": true,
+      "rank": 2,
+      "date": "2026-10",
+      "timeline": "Oct 2026",
+      "oneLineProblem": "A lathe chuck faces sideways, so the billet has to travel along the spindle axis to get in.",
+      "problem": "My team built a knob-driven jib arm for the DriveNext RANE SLD Hackathon 2026 and placed 1st runner-up, but there was no model of it: nobody could say whether it actually reached the chuck, what the linear actuator had to push, or how fine the knobs were. I rebuilt the arm in ROS 2 and Gazebo from a photograph and the two dimensions I had measured, then used it to answer those questions. A lathe chuck faces sideways rather than up, which turns out to decide the entire cell layout.",
+      "constraints": [
+        "Only two dimensions are measured from the real robot: 1.5 m column to the boom pivot, 1.0 m boom. Everything else is estimated from one photograph and labelled as such.",
+        "The Raspberry Pi 5 has no analog inputs, so five potentiometer knobs read through two ADS1115 ADCs on I2C.",
+        "URDF cannot express the closed loop formed by column, actuator and boom.",
+        "Gazebo will not hold a part by finger friction, so the grasp has to be faked honestly."
+      ],
+      "approach": [
+        {
+          "decision": "Model the boom as a linear actuator rather than a joint, and map the boom knob to 387 mm of stroke.",
+          "why": "That is what the knob on the real robot moved. The boom angle is recovered from the stroke with the law of cosines, and the round trip is unit tested."
+        },
+        {
+          "decision": "Tie wrist pitch to boom lift (j3 = -j2) so the gripper stays level, and accept losing a degree of freedom.",
+          "why": "A billet entering a chuck has to go in straight. With the wrist tied, the fingertips can only move on one circle: r = 0.13 + 1.00 cos(j2), z = 1.20 + 1.00 sin(j2). That is not a tuning problem, it is the shape of the machine, and it is what fixes where the tray and the chuck have to stand."
+        },
+        {
+          "decision": "Insert with a base swing, with the lathe standing side-on and the wrist rolled a quarter turn first.",
+          "why": "The base swing is the only motion that is horizontal and keeps the gripper level, so it is the only one that can push a billet along a horizontal spindle. The billet lies radially on the tray because that is the only way the fingers close across it, so the wrist rolls 90 degrees - exactly its range - before the arm goes near the machine."
+        },
+        {
+          "decision": "Solve the two insertion points as Cartesian targets instead of as a yaw offset.",
+          "why": "A base swing is an arc and the spindle is a straight line, so over 130 mm of insertion they drift 7 mm apart. Solving Cartesian targets lets the boom and wrist absorb the drift; the cost is 1.5 degrees of gripper pitch at the start of the push, and a test fails past 2.5 degrees."
+        },
+        {
+          "decision": "Keep every cell dimension in one Python module and generate the waypoints from it.",
+          "why": "Moving the lathe is then one number. A test parses the Gazebo world file and fails if it has drifted from that module, and another fails if the guard rail creeps above the height the arm swings at."
+        }
+      ],
+      "architecture": {
+        "summary": "Five potentiometers reach the Pi through two ADS1115 ADCs; the same joint targets can come from the knobs, from the web HMI's virtual sliders, or from a replayed teach file. A linkage node drives the drawn actuator, and a sim-only grasp node hands the billet between gripper and chuck.",
+        "stages": [
+          {
+            "title": "Input",
+            "items": [
+              "5 potentiometer knobs",
+              "2x ADS1115 over I2C",
+              "Web HMI on :8000 (sliders, teach list, stop)"
+            ]
+          },
+          {
+            "title": "Teach layer",
+            "items": [
+              "pot_teleop: smoothing, deadband, stroke to angle",
+              "replay_node: waypoint YAML, arm then gripper",
+              "make_waypoints.py solves the cell geometry"
+            ]
+          },
+          {
+            "title": "Control",
+            "items": [
+              "arm_controller and gripper_controller (ros2_control)",
+              "linkage_node: drawn actuator, visual only"
+            ]
+          },
+          {
+            "title": "Gazebo cell",
+            "items": [
+              "Slant-bed lathe 2.05 x 1.40 m, chuck, turret, tailstock",
+              "Job tray, five 50 x 100 mm billets",
+              "part_grasp: detachable joints, sim only"
+            ]
+          }
+        ]
+      },
+      "results": [
+        {
+          "label": "Actuator stroke for the full boom range",
+          "value": "387",
+          "unit": "mm",
+          "context": "767 to 1,154 mm for -30 to 45 degrees of boom, moment arm 189 to 350 mm.",
+          "headline": true
+        },
+        {
+          "label": "Peak actuator push",
+          "value": "140",
+          "unit": "N",
+          "context": "At 45 degrees carrying a 0.3 kg part, so the part to buy is rated 300 N or more. From the estimated dimensions, so it is a sizing exercise.",
+          "headline": true
+        },
+        {
+          "label": "Load cycle measured in Gazebo",
+          "value": "35.7",
+          "unit": "s",
+          "context": "One headless replay run, including the first move from zero to home. The timing script gives 41.0 s at a fixed 3 s per move and 27.4 s when each move gets the time its slowest joint needs.",
+          "headline": true
+        },
+        {
+          "label": "Reach with the gripper kept vertical",
+          "value": "0.84-1.13",
+          "unit": "m",
+          "context": "0.70 to 1.91 m high. The tray at r 1.052 and the chuck at r 1.106 both sit inside it, which is how their radii were chosen."
+        },
+        {
+          "label": "Billet seated against the target point",
+          "value": "0.2",
+          "unit": "mm",
+          "context": "Last headless run: billet at (0.6342, 0.9057, 1.0260) with its axis along the spindle."
+        },
+        {
+          "label": "Knob deadband at the gripper",
+          "value": "4.9",
+          "unit": "mm",
+          "context": "1.36 degrees at the base, 1.55 mm of actuator stroke. The ADC is not the limit, the filter deadband is, and it is what stops the arm twitching."
+        },
+        {
+          "label": "Tests passing without a simulator",
+          "value": "57",
+          "unit": "",
+          "context": "Kinematics round trips, pot mapping, move timing, waypoints inside limits and within 1 cm of the tray and chuck grip points, and the world file still agreeing with the cell geometry."
+        }
+      ],
+      "failures": [
+        {
+          "what": "The first run dropped the billet. The grasp node opened the gripper's joint and closed the chuck's 0.3 s later, which was fine on a chuck facing up. On a horizontal spindle 0.3 s is long enough to fall 0.2 m onto the cabinet, which is where it landed.",
+          "fix": "The chuck's joint closes first and the gripper's opens 0.15 s after, so the billet is never free."
+        },
+        {
+          "what": "The trajectory controller's spline peaks at about 1.9 times the average speed, so moves given only their average time made the base hit its velocity limit and overshoot by more than a radian.",
+          "fix": "Every move is stretched by 1.9 and the replay waits for /joint_states to be inside tolerance before starting the next one."
+        },
+        {
+          "what": "The sweep across the machine ramped up in height on the way, so the billet passed the front guard low.",
+          "fix": "A clear waypoint at the same height as the over-machine pose, so the carry height is constant across the whole sweep."
+        },
+        {
+          "what": "The drawn linear actuator detached from the boom, because URDF has no way to close the column-actuator-boom loop.",
+          "fix": "Two extra joints driven from the boom angle, visual only, with a test that the rod tip lands on the boom attach point at several angles."
+        }
+      ],
+      "myRole": "Solo rebuild. I wrote the arm model and inverse kinematics, the URDF and the Gazebo cell, the potentiometer and ADS1115 path, the web HMI, the teach and replay nodes, the waypoint generator, the actuator and workspace analysis, and the recording tooling. The hackathon robot was a team build; this repository is not the hackathon code and says so, and every dimension beyond the column and boom lengths is marked as estimated from a photograph.",
+      "teamSize": 1,
+      "environment": "Simulation",
+      "status": "Complete",
+      "stack": [
+        "ROS 2 Jazzy",
+        "ros2_control",
+        "Gazebo Harmonic",
+        "Python",
+        "xacro / SDF",
+        "ADS1115 I2C",
+        "pytest"
+      ],
+      "media": {
+        "hero": {
+          "type": "video",
+          "src": "/media/cnc-lathe-arm/load_cycle_gazebo.mp4",
+          "poster": "/media/cnc-lathe-arm/load_cycle_gazebo_poster.jpg",
+          "alt": "Simulated jib arm lifting a billet off a tray and sliding it into a lathe chuck",
+          "width": 960,
+          "height": 640
+        },
+        "gallery": [
+          {
+            "type": "image",
+            "src": "/media/cnc-lathe-arm/rane_arm.webp",
+            "alt": "The yellow jib arm built for the RANE hackathon, with column, boom, linear actuator and gripper",
+            "caption": "The robot this models: column on a slewing bearing, boom lifted by a linear actuator, wrist servo and two-finger gripper, every axis on a potentiometer knob.",
+            "width": 698,
+            "height": 1190
+          },
+          {
+            "type": "image",
+            "src": "/media/cnc-lathe-arm/hmi.webp",
+            "alt": "Web HMI with sliders, a side and top drawing of the arm, and a teach list",
+            "caption": "The HMI serves virtual knobs, a live side and top drawing, a stop button, the keep-gripper-vertical toggle, and the teach list.",
+            "width": 1000,
+            "height": 1250
+          },
+          {
+            "type": "image",
+            "src": "/media/cnc-lathe-arm/workspace.webp",
+            "alt": "Reachable workspace of the arm with the gripper held vertical",
+            "caption": "Holding the gripper level leaves one curve, which is why the tray and chuck radii are not free choices.",
+            "width": 1210,
+            "height": 550
+          },
+          {
+            "type": "image",
+            "src": "/media/cnc-lathe-arm/actuator.webp",
+            "alt": "Actuator length, moment arm and push force against boom angle",
+            "caption": "Stroke and force against boom angle: 387 mm of travel and 140 N peak push with a 0.3 kg part.",
+            "width": 1100,
+            "height": 440
+          }
+        ]
+      },
+      "links": {
+        "repo": "https://github.com/MaharajLMR/cnc-lathe-arm"
+      },
+      "next": [
+        "Measure the real arm properly and replace the photo estimates.",
+        "Run the ADS1115 path on real boards instead of only through its conversion functions.",
+        "Give the fingers collision geometry and a real grasp instead of a detachable joint."
+      ]
+    },
+    {
+      "slug": "delta-parallel-kinematics",
+      "title": "Delta and Stewart Parallel Kinematics",
+      "tagline": "Closed-form delta kinematics, 0.2 microseconds per solve",
+      "category": "Robotics & Control",
+      "featured": true,
+      "rank": 3,
+      "date": "2026-10",
+      "timeline": "Oct 2026",
+      "oneLineProblem": "Parallel robots have closed chains: URDF cannot express them and numerical solvers are too slow and fail quietly.",
+      "problem": "A Clavel delta robot has three closed kinematic chains. URDF describes trees, so it cannot represent the parallelogram forearms, and a numerical solver costs around 100 microseconds per call and will happily return a pose that is physically unreachable. I derived the closed-form inverse and forward kinematics and the analytical Jacobian in C++17, then used the Jacobian to reject goals near singularities instead of discovering them in the hardware.",
+      "constraints": [
+        "The kinematics library has no ROS dependency, so it can be unit tested and benchmarked on its own.",
+        "Geometry is taken from Clavel's published delta papers, not from any lab: base radius 0.200 m, end-effector radius 0.060 m, upper arm 0.250 m, forearm 0.450 m.",
+        "Active joints limited to -45 to 80 degrees to stay off the horizontal singularity and clear of mechanical interference.",
+        "No Gazebo run has been recorded yet, so the motion shown here is the kinematic animation, not physics."
+      ],
+      "approach": [
+        {
+          "decision": "Solve the inverse kinematics in closed form with a half-angle substitution.",
+          "why": "A cos(t) + B sin(t) = C becomes a quadratic in tan(t/2). It is exact and about 480x faster than scipy's fsolve, and a negative discriminant means the target is genuinely unreachable, so the solver throws instead of returning something plausible."
+        },
+        {
+          "decision": "Compute forward kinematics as the intersection of three spheres.",
+          "why": "Subtracting the sphere equations pairwise gives two planes, their intersection a line, and the line against the first sphere a quadratic. The physical root is the one with the larger Z, which keeps the arm below the base plate where a delta actually works."
+        },
+        {
+          "decision": "Build the analytical Jacobian and refuse any goal whose condition number is above 100.",
+          "why": "Near a singularity small Cartesian moves need enormous joint speeds. Checking the condition number is cheap and turns a silent accuracy failure into a rejected command. Condition number is 1.45 at the workspace centre and peaks at 1.09 along the test circle."
+        },
+        {
+          "decision": "Close the kinematic loop twice: SDF ball joints in Gazebo, computed passive angles in RViz.",
+          "why": "Gazebo's constraint solver can hold the parallelogram physically; RViz only renders a tree, so a passive joint publisher computes the forearm angles from forward kinematics. One robot, two descriptions, with the same numbers behind both."
+        },
+        {
+          "decision": "Compare a minimum-jerk profile against the trapezoidal one at the same cycle time.",
+          "why": "Equal cycle time makes it a fair comparison: minimum jerk cuts peak jerk by 71.9 % for the same 5 s, which is what matters for a parallel robot's passive joints."
+        }
+      ],
+      "architecture": {
+        "summary": "A pure C++17 kinematics library sits under everything: a ROS 2 Cartesian commander that turns points into joint trajectories and rejects near-singular goals, a passive joint publisher for RViz, SDF ball joints for Gazebo, and a set of analysis scripts that produce every number quoted here.",
+        "stages": [
+          {
+            "title": "Library",
+            "items": [
+              "delta_kinematics (C++17, no ROS)",
+              "Closed-form IK, sphere-intersection FK",
+              "Analytical Jacobian and condition number",
+              "11 GoogleTest cases"
+            ]
+          },
+          {
+            "title": "ROS 2",
+            "items": [
+              "CartesianCommander: point to joint trajectory",
+              "Rejects condition number > 100",
+              "delta_passive: computed passive angles for RViz"
+            ]
+          },
+          {
+            "title": "Description",
+            "items": [
+              "URDF tree for RViz",
+              "SDF with ball joints for Gazebo physics"
+            ]
+          },
+          {
+            "title": "Analysis",
+            "items": [
+              "Workspace cloud, Jacobian condition map",
+              "Trapezoidal and minimum-jerk profilers",
+              "IK benchmark against scipy",
+              "Stewart 6-UPS platform, 16 pytest cases"
+            ]
+          }
+        ]
+      },
+      "results": [
+        {
+          "label": "Inverse kinematics per call",
+          "value": "0.21",
+          "unit": "microseconds",
+          "context": "C++17 at -O2 over 100,000 random targets on a Ryzen 7 3750H. scipy fsolve takes 100.1 us on the same points: 481x. The analytical solver in Python is 6.2 us, so most of the win is the closed form, not the language.",
+          "headline": true
+        },
+        {
+          "label": "Forward-inverse round trip",
+          "value": "<1e-9",
+          "unit": "m",
+          "context": "10,000 random in-workspace points, checked in the C++ test suite.",
+          "headline": true
+        },
+        {
+          "label": "Peak jerk cut by minimum-jerk profile",
+          "value": "71.9",
+          "unit": "%",
+          "context": "240 against 853 rad/s^3 at the same 5 s cycle time.",
+          "headline": true
+        },
+        {
+          "label": "Round-trip error on a 70 mm circle",
+          "value": "2.6e-16",
+          "unit": "m",
+          "context": "100 points at z = -0.5 m, which is the floating-point floor; peak Jacobian condition number 1.09, nothing unreachable."
+        },
+        {
+          "label": "Workspace reachable in the sampled cube",
+          "value": "47.7",
+          "unit": "%",
+          "context": "Conservative cube of plus or minus 12 cm in XY and -35 to -65 cm in Z."
+        },
+        {
+          "label": "Near-singular points in the working slice",
+          "value": "0 / 3,076",
+          "unit": "",
+          "context": "Condition number above 100 at z = -0.50 m."
+        },
+        {
+          "label": "Pick-and-place cycle",
+          "value": "2.45",
+          "unit": "s",
+          "context": "Trapezoidal profile, peak joint velocity 107 deg/s against a 180 deg/s limit, so 59 % used."
+        },
+        {
+          "label": "Stewart platform poses reachable",
+          "value": "23.0",
+          "unit": "%",
+          "context": "10,000 sampled poses of a 6-UPS platform with 0.35 to 0.65 m legs; maximum tilt 24 degrees."
+        }
+      ],
+      "failures": [
+        {
+          "what": "The first inverse kinematics used only the radial projection of the wrist offset and ignored the tangential component, so off-axis targets were about 3.8 mm out while on-axis ones looked perfect.",
+          "fix": "The parallelogram forearm swings tangentially, so the effective length in the radial plane is sqrt(Lf^2 - tau^2). With that correction the round-trip error dropped to floating-point noise, and a 10,000-point round-trip test now guards it."
+        },
+        {
+          "what": "Forward kinematics sometimes returned the mirror solution, the one with the arm above the base plate.",
+          "fix": "Pick the root with the larger Z, which is the only physically reachable branch for a downward-pointing delta."
+        },
+        {
+          "what": "Unreachable targets came back as plausible joint angles from the numerical solver.",
+          "fix": "The closed form has a discriminant: negative means unreachable, and it throws rather than returning a guess."
+        }
+      ],
+      "myRole": "Solo project: the derivation, the C++17 library, the ROS 2 commander and passive joint publisher, both robot descriptions, the Stewart platform solver, and every analysis script. The geometry comes from Clavel's published papers.",
+      "teamSize": 1,
+      "environment": "Simulation",
+      "status": "In progress",
+      "stack": [
+        "C++17",
+        "GoogleTest",
+        "ROS 2 Jazzy",
+        "Gazebo Harmonic",
+        "Python",
+        "NumPy",
+        "Matplotlib",
+        "pytest"
+      ],
+      "media": {
+        "hero": {
+          "type": "video",
+          "src": "/media/delta-parallel-kinematics/delta_animation.mp4",
+          "poster": "/media/delta-parallel-kinematics/delta_animation_poster.jpg",
+          "alt": "Animated delta robot tracing a pick-and-place path with its three arms",
+          "caption": "Kinematic animation driven by the C++ solver. No Gazebo run has been recorded yet.",
+          "width": 1000,
+          "height": 800
+        },
+        "gallery": [
+          {
+            "type": "image",
+            "src": "/media/delta-parallel-kinematics/solver_benchmark.webp",
+            "alt": "Solve time distribution for the analytical and numerical solvers",
+            "caption": "Closed form against scipy fsolve on the same 1,000 targets: 6.2 us in Python, 0.21 us in C++, 100.1 us numerical.",
+            "width": 1600,
+            "height": 664
+          },
+          {
+            "type": "image",
+            "src": "/media/delta-parallel-kinematics/workspace_cloud.webp",
+            "alt": "Point cloud of the reachable delta workspace",
+            "caption": "47.7 % of the sampled cube is reachable; the shape is what the joint limits leave.",
+            "width": 1600,
+            "height": 574
+          },
+          {
+            "type": "image",
+            "src": "/media/delta-parallel-kinematics/jacobian_condition.webp",
+            "alt": "Jacobian condition number across an XY slice of the workspace",
+            "caption": "Condition number across the working slice: 1.45 at centre, none above 100.",
+            "width": 1600,
+            "height": 730
+          },
+          {
+            "type": "image",
+            "src": "/media/delta-parallel-kinematics/trajectory_comparison.webp",
+            "alt": "Position, velocity, acceleration and jerk for trapezoidal and minimum-jerk profiles",
+            "caption": "Same 5 s cycle, 71.9 % less peak jerk.",
+            "width": 1600,
+            "height": 1579
+          },
+          {
+            "type": "image",
+            "src": "/media/delta-parallel-kinematics/stewart_workspace.webp",
+            "alt": "Reachable workspace of the six-leg Stewart platform",
+            "caption": "The 6-UPS Stewart platform: 23.0 % of sampled poses reachable, 24 degrees of tilt.",
+            "width": 1600,
+            "height": 529
+          }
+        ]
+      },
+      "links": {},
+      "next": [
+        "Record the Gazebo pick-and-place run and replace the kinematic animation with it.",
+        "Measure tracking error against the physics solver, not only against the analytical round trip.",
+        "Add a dynamics model so the jerk comparison can be checked against joint torques."
+      ]
+    },
+    {
+      "slug": "agv-diff-drive-sim",
+      "title": "Differential-Drive AGV Simulation",
+      "tagline": "One AGV sim that exposed three silent bugs",
+      "category": "Robotics & Control",
+      "featured": true,
+      "rank": 4,
+      "date": "2026-10",
+      "timeline": "Sep 2026",
+      "oneLineProblem": "Sensor data that looks fine in RViz can be wrong in ways only a recorded run will show.",
+      "problem": "Before building the five-robot fleet I built one robot, to learn exactly how URDF, ros_gz_bridge and the differential-drive plugin fit together. Then I drove it a 3 m square and put the live values from /odom and /scan on the recorded video. Three things that had looked fine were wrong, and two of them would have been invisible without the overlay.",
+      "constraints": [
+        "Headless rendering on this laptop takes about ten minutes per demo run, so each recording has to count.",
+        "Front wheels have zero friction so they do not fight the differential-drive plugin, which a real AGV would solve with castors."
+      ],
+      "approach": [
+        {
+          "decision": "Build the smallest useful robot: box chassis, four wheels, one 2D lidar.",
+          "why": "Every dimension stays in the xacro so the lidar mount is derived from the chassis and lidar heights rather than typed in twice."
+        },
+        {
+          "decision": "Drive a 3 m square closed-loop on /odom instead of open-loop timing.",
+          "why": "An open-loop square hides odometry sign errors; a closed-loop one stops at the corner the odometry believes in, so a wrong sign shows up as a wrong shape."
+        },
+        {
+          "decision": "Overlay live /odom and /scan values onto the recorded frames.",
+          "why": "The numbers are read off the topics while it drives, so the video cannot show something the robot was not publishing. That is how the tilted lidar and the wall-clock bug surfaced."
+        },
+        {
+          "decision": "Turn each bug into a test that fails if it returns.",
+          "why": "All three were configuration mistakes, and configuration mistakes come back. The tests need no simulator, so CI runs them on every push."
+        }
+      ],
+      "architecture": {
+        "summary": "The xacro robot description feeds robot_state_publisher and the Gazebo spawn; ros_gz_bridge carries clock, odometry, scan, tf and joint states one way and velocity commands the other, with each entry's direction set explicitly.",
+        "stages": [
+          {
+            "title": "Description",
+            "items": [
+              "my_agv.urdf.xacro: 0.40 x 0.30 x 0.10 m chassis",
+              "0.08 m wheels, 0.36 m drive axle",
+              "360 degree lidar at 10 Hz, 0.2 to 12 m, on the roof"
+            ]
+          },
+          {
+            "title": "ROS 2",
+            "items": [
+              "robot_state_publisher",
+              "ros_gz_bridge with explicit directions",
+              "drive_demo.py: closed loop on /odom"
+            ]
+          },
+          {
+            "title": "Gazebo Harmonic",
+            "items": [
+              "Warehouse world with Fuel racks and buckets",
+              "diff-drive plugin, GPU lidar",
+              "Two fixed cameras only the recorder reads"
+            ]
+          }
+        ]
+      },
+      "results": [
+        {
+          "label": "Distance driven in the recorded run",
+          "value": "15.0",
+          "unit": "m",
+          "context": "49.9 s of simulated time, closed loop on /odom.",
+          "headline": true
+        },
+        {
+          "label": "Closest lidar return after the fix",
+          "value": "3.22",
+          "unit": "m",
+          "context": "The same run reported a constant 0.94 m before: the floor, hit by a scan plane tilted 15 degrees.",
+          "headline": true
+        },
+        {
+          "label": "Configuration bugs caught and pinned by tests",
+          "value": "3",
+          "unit": "",
+          "context": "Tilted lidar, bidirectional /clock bridge, floating lidar mount. Each has a test that fails if it returns.",
+          "headline": true
+        }
+      ],
+      "failures": [
+        {
+          "what": "The lidar was mounted with a pitch of -0.26 rad, so the whole 360 degree scan plane sat at 15 degrees. One side of the ring hit the floor 0.94 m ahead, and since that was always the nearest thing, min(ranges) read 0.94 m wherever the robot was. The scan was useless for seeing anything.",
+          "fix": "Level the joint. The same run then reports returns from 3.2 to 6 m, and a test fails if the lidar is tilted again."
+        },
+        {
+          "what": "/clock was bridged with @, which is bidirectional, and the bridge chose ROS to Gazebo. Nothing on the ROS side ever received simulated time, so every node was quietly running on wall clock.",
+          "fix": "Every bridge entry is now explicit, [ for Gazebo to ROS and ] for ROS to Gazebo, with a test that fails if an entry points the wrong way."
+        },
+        {
+          "what": "The lidar joint had a hardcoded z of 0.15, which put the sensor 0.08 m above the chassis roof with nothing under it. It floated.",
+          "fix": "The offset is computed from the chassis and lidar heights, so it stays on the roof if either changes."
+        }
+      ],
+      "myRole": "Solo project: robot description, worlds, launch files, the closed-loop drive script, the recording and video tooling, and the tests.",
+      "teamSize": 1,
+      "environment": "Simulation",
+      "status": "Complete",
+      "stack": [
+        "ROS 2 Jazzy",
+        "Gazebo Harmonic",
+        "ros_gz_bridge",
+        "xacro",
+        "Python",
+        "pytest"
+      ],
+      "media": {
+        "hero": {
+          "type": "video",
+          "src": "/media/agv-diff-drive-sim/agv_demo.mp4",
+          "poster": "/media/agv-diff-drive-sim/agv_demo_poster.jpg",
+          "alt": "Differential-drive AGV driving a square in a Gazebo warehouse with live odometry and scan values overlaid",
+          "width": 1280,
+          "height": 720
+        },
+        "gallery": [
+          {
+            "type": "image",
+            "src": "/media/agv-diff-drive-sim/robot.webp",
+            "alt": "The AGV model in the warehouse world: red box chassis, four wheels, lidar on the roof",
+            "caption": "Everything in the description derives from the chassis and lidar dimensions, including the mount height that used to float.",
+            "width": 960,
+            "height": 390
+          }
+        ]
+      },
+      "links": {
+        "repo": "https://github.com/MaharajLMR/AGV"
+      },
+      "next": [
+        "Replace the frictionless front wheels with castors so the physics matches a real AGV.",
+        "Add SLAM Toolbox mapping to the same robot instead of driving a known square."
+      ]
+    }
+  ],
+  "more": [
+    {
+      "slug": "weld-defect-detector",
+      "title": "Weld Defect Detector",
+      "line": "YOLOv8 weld inspection pipeline with a phone-camera client, severity scoring and an active-learning queue. 45 tests pass; there is no dataset or trained model yet, so it has no accuracy numbers.",
+      "stack": [
+        "YOLOv8",
+        "FastAPI",
+        "Python",
+        "OpenCV"
+      ],
+      "status": "In progress",
+      "note": "Built with a teammate; the repository stays private until they agree to publish it."
+    },
+    {
+      "slug": "hand-gesture-arm",
+      "title": "Hand-Gesture Controlled Arm",
+      "line": "Robotic hand that copies webcam-detected hand gestures in real time, built for remote handling of hazardous work.",
+      "stack": [
+        "OpenCV",
+        "Python",
+        "Arduino"
+      ],
+      "status": "Hardware build, 2025",
+      "note": "Earlier hardware build, no public code."
+    },
+    {
+      "slug": "ups-sorting-conveyor",
+      "title": "Defective Package Sorting Conveyor",
+      "line": "Vision-based conveyor that spots defective packages and deflects them with a servo arm. Prototype demonstrated to United Parcel Service engineers.",
+      "stack": [
+        "Image processing",
+        "Servo actuation",
+        "Embedded C"
+      ],
+      "status": "Hardware build, 2025",
+      "note": "Earlier hardware build, no public code."
+    },
+    {
+      "slug": "magnetic-wall-climbing-rover",
+      "title": "Magnetic Wall-Climbing Rover",
+      "line": "Rover that holds itself to a ship hull with magnetic adhesion to clean rust and inspect vertical steel.",
+      "stack": [
+        "Mechanism design",
+        "Embedded control",
+        "SolidWorks"
+      ],
+      "status": "Hardware build, 2025",
+      "note": "Earlier hardware build, no public code."
+    },
+    {
+      "slug": "agricultural-multi-function-robot",
+      "title": "Agricultural Multi-Function Robot",
+      "line": "Autonomous robot for seeding, ploughing and soil preparation, modelled in SolidWorks with sensor-based navigation. Selected for the Smart India Hackathon 2025 institutional round.",
+      "stack": [
+        "SolidWorks",
+        "Embedded control",
+        "Sensor navigation"
+      ],
+      "status": "Hardware build, 2025",
+      "note": "Earlier hardware build, no public code."
+    }
+  ]
+}
