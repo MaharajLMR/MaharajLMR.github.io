@@ -48,7 +48,7 @@ export default async function CaseStudy({ params }: { params: Promise<Params> })
   return (
     <article>
       <Section tone="dark" labelledBy="case-title">
-        <Reveal>
+        <Reveal fade={false}>
           <p className="text-small font-medium uppercase tracking-[0.16em] text-accent">
             {project.category}
           </p>
@@ -57,7 +57,7 @@ export default async function CaseStudy({ params }: { params: Promise<Params> })
           </h1>
           <p className="mt-6 max-w-prose text-tagline text-ink-secondary">{project.tagline}.</p>
         </Reveal>
-        <Reveal delay={0.08}>
+        <Reveal fade={false} delay={0.08}>
           <dl className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <Fact label="Team" value={project.teamSize === 1 ? 'Solo' : `${project.teamSize} people`} />
             <Fact label="Timeline" value={project.timeline} />
@@ -102,7 +102,7 @@ export default async function CaseStudy({ params }: { params: Promise<Params> })
 
       <Section tone="light">
         <Reveal>
-          <Media item={project.media.hero} priority />
+          <Media item={project.media.hero} />
           {project.media.hero.caption ? (
             <p className="mt-4 text-small text-ink-secondary">{project.media.hero.caption}</p>
           ) : null}

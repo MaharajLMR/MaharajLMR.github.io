@@ -1,3 +1,4 @@
+import VideoPlayer from './VideoPlayer';
 import { asset } from '@/lib/asset';
 import type { MediaItem } from '@/lib/types';
 
@@ -18,22 +19,7 @@ export default function Media({ item, priority = false, className = '', rounded 
   const shape = `${rounded ? 'rounded-card' : ''} ${fill ? 'h-full w-full object-cover' : 'h-auto w-full'} ${className}`;
 
   if (item.type === 'video') {
-    return (
-      <video
-        className={shape}
-        width={item.width}
-        height={item.height}
-        poster={item.poster ? asset(item.poster) : undefined}
-        preload={priority ? 'auto' : 'none'}
-        autoPlay
-        muted
-        loop
-        playsInline
-        aria-label={item.alt}
-      >
-        <source src={asset(item.src)} type="video/mp4" />
-      </video>
-    );
+    return <VideoPlayer item={item} className={shape} />;
   }
 
   return (
@@ -42,9 +28,11 @@ export default function Media({ item, priority = false, className = '', rounded 
       className={shape}
       src={asset(item.src)}
       alt={item.alt}
+      {...(item.alt ? {} : { 'aria-hidden': true })}
       width={item.width}
       height={item.height}
       loading={priority ? 'eager' : 'lazy'}
+      fetchPriority={priority ? 'high' : 'auto'}
       decoding="async"
     />
   );

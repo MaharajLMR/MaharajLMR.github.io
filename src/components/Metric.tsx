@@ -40,7 +40,11 @@ export default function Metric({ value, unit, label, context }: Props) {
     <div ref={ref}>
       <p className="text-metric tabular">
         {shown}
-        {unit ? <span className="ml-1 text-[0.45em] font-normal text-ink-secondary">{unit}</span> : null}
+        {unit ? (
+          <span className="ml-2 whitespace-nowrap text-[0.4em] font-normal tracking-normal text-ink-secondary">
+            {unit}
+          </span>
+        ) : null}
       </p>
       <p className="mt-2 text-small font-medium">{label}</p>
       {context ? <p className="mt-1 max-w-[34ch] text-small text-ink-secondary">{context}</p> : null}

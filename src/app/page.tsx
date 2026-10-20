@@ -16,7 +16,7 @@ export default function Home() {
 
   return (
     <>
-      <Hero site={site} backdrop={first.media.hero} />
+      <Hero site={site} backdrop={site.heroBackdrop} />
       <div id="work">
         <ProjectBand project={first} tone={TONES[0] as Tone} pinned />
         {rest.map((project, i) => (

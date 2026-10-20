@@ -183,7 +183,7 @@
         "hero": {
           "type": "video",
           "src": "/media/resilient-agv-fleet/fleet_showcase.mp4",
-          "poster": "/media/resilient-agv-fleet/fleet_showcase_poster.jpg",
+          "poster": "/media/resilient-agv-fleet/fleet_showcase_poster.webp",
           "alt": "Five AGVs driving a Gazebo warehouse with racks, a forklift and two walking workers",
           "width": 1200,
           "height": 720
@@ -414,7 +414,7 @@
         "hero": {
           "type": "video",
           "src": "/media/cnc-lathe-arm/load_cycle_gazebo.mp4",
-          "poster": "/media/cnc-lathe-arm/load_cycle_gazebo_poster.jpg",
+          "poster": "/media/cnc-lathe-arm/load_cycle_gazebo_poster.webp",
           "alt": "Simulated jib arm lifting a billet off a tray and sliding it into a lathe chuck",
           "width": 960,
           "height": 640
@@ -625,7 +625,7 @@
         "hero": {
           "type": "video",
           "src": "/media/delta-parallel-kinematics/delta_animation.mp4",
-          "poster": "/media/delta-parallel-kinematics/delta_animation_poster.jpg",
+          "poster": "/media/delta-parallel-kinematics/delta_animation_poster.webp",
           "alt": "Animated delta robot tracing a pick-and-place path with its three arms",
           "caption": "Kinematic animation driven by the C++ solver. No Gazebo run has been recorded yet.",
           "width": 1000,
@@ -796,7 +796,7 @@
         "hero": {
           "type": "video",
           "src": "/media/agv-diff-drive-sim/agv_demo.mp4",
-          "poster": "/media/agv-diff-drive-sim/agv_demo_poster.jpg",
+          "poster": "/media/agv-diff-drive-sim/agv_demo_poster.webp",
           "alt": "Differential-drive AGV driving a square in a Gazebo warehouse with live odometry and scan values overlaid",
           "width": 1280,
           "height": 720

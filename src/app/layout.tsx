@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 
 import Footer from '@/components/Footer';
+import MotionProvider from '@/components/MotionProvider';
 import Nav from '@/components/Nav';
 import { site } from '@/lib/content';
 
@@ -9,7 +10,7 @@ import './globals.css';
 
 const inter = Inter({
   subsets: ['latin'],
-  display: 'swap',
+  display: 'optional',
   variable: '--font-inter',
 });
 
@@ -57,9 +58,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <Nav name={site.name} />
-        <main id="main">{children}</main>
-        <Footer site={site} updated={updated} />
+        <MotionProvider>
+          <Nav name={site.name} />
+          <main id="main">{children}</main>
+          <Footer site={site} updated={updated} />
+        </MotionProvider>
       </body>
     </html>
   );

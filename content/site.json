@@ -1,6 +1,6 @@
 {
   "name": "Maharaj L M R",
-  "roleLine": "Mechatronics engineer - ROS 2, control and simulation",
+  "roleLine": "Mechatronics engineer · ROS 2, control and simulation",
   "identityLine": "I build ROS 2 systems for robots that have to share space and keep working: a five-AGV fleet that clears its own deadlocks, a jib arm that loads a lathe chuck, and the kinematics underneath them.",
   "proofStrip": [
     "ROS 2 Jazzy",
@@ -132,5 +132,12 @@
     "title": "Maharaj L M R - Robotics and ROS 2 engineer",
     "description": "ROS 2 and simulation engineer. Multi-robot traffic control for a five-AGV warehouse fleet, a CNC lathe loading arm, and closed-form delta kinematics. Every number traces to a script in the repo.",
     "url": "https://maharajlmr.github.io"
+  },
+  "heroBackdrop": {
+    "type": "image",
+    "src": "/media/hero_backdrop.webp",
+    "alt": "",
+    "width": 1200,
+    "height": 720
   }
 }

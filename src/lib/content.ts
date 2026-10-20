@@ -64,7 +64,8 @@ function media(value: unknown, where: string): MediaItem {
   const item: MediaItem = {
     type,
     src: assetExists(str(raw.src, `${where}.src`), `${where}.src`),
-    alt: str(raw.alt, `${where}.alt`),
+    // An empty alt is allowed and means decorative; anything else must say something.
+    alt: typeof raw.alt === 'string' ? raw.alt : fail(`${where}.alt`, 'expected a string'),
     width: Number(raw.width),
     height: Number(raw.height),
   };
@@ -181,6 +182,7 @@ const more: MoreProject[] = (projectsJson.more as unknown[]).map((value, index) 
 
 const site = siteJson as Site;
 assetExists(site.resumePdf, 'site.resumePdf');
+site.heroBackdrop = media(siteJson.heroBackdrop, 'site.heroBackdrop');
 
 const BANNED = [
   'passionate',

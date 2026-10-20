@@ -84,6 +84,7 @@ export type Site = {
   linkedin: string;
   resumePdf: string;
   avatar: string;
+  heroBackdrop: MediaItem;
   education: { degree: string; institution: string; period: string; detail: string }[];
   experience: { role: string; org: string; period: string; detail: string }[];
   achievements: { title: string; detail: string; project: string }[];
