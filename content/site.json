@@ -21,7 +21,6 @@
   "github": "https://github.com/MaharajLMR",
   "linkedin": "https://linkedin.com/in/maharaj-lmr",
   "resumePdf": "/resume.pdf",
-  "avatar": "/media/avatar.jpg",
   "education": [
     {
       "degree": "BE Mechatronics Engineering",
@@ -138,6 +137,6 @@
     "src": "/media/hero_backdrop.webp",
     "alt": "",
     "width": 1200,
-    "height": 562
+    "height": 446
   }
 }

@@ -4,6 +4,7 @@ import path from 'node:path';
 import projectsJson from '@content/projects.json';
 import siteJson from '@content/site.json';
 
+import { imageSize } from './imagesize';
 import type {
   Category,
   Environment,
@@ -58,6 +59,24 @@ function assetExists(src: string, where: string): string {
   return src;
 }
 
+function fileSize(src: string): { width: number; height: number } {
+  return imageSize(fs.readFileSync(path.join(PUBLIC_DIR, src)));
+}
+
+function assertDeclaredSize(src: string, width: number, height: number, where: string): void {
+  const real = fileSize(src);
+  if (real.width !== width || real.height !== height) {
+    fail(where, `public${src} is ${real.width}x${real.height}, content says ${width}x${height}`);
+  }
+}
+
+function assertDeclaredAspect(src: string, aspect: number, where: string): void {
+  const real = fileSize(src);
+  if (Math.abs(real.width / real.height - aspect) > 0.01 * aspect) {
+    fail(where, `public${src} is ${real.width}x${real.height}, a different shape to the video`);
+  }
+}
+
 function media(value: unknown, where: string): MediaItem {
   const raw = value as Record<string, unknown>;
   const type = oneOf(raw.type, ['image', 'video'] as const, `${where}.type`);
@@ -74,6 +93,14 @@ function media(value: unknown, where: string): MediaItem {
   }
   if (typeof raw.poster === 'string') item.poster = assetExists(raw.poster, `${where}.poster`);
   if (type === 'video' && !item.poster) fail(where, 'a video needs a poster frame');
+  if (type === 'image') {
+    assertDeclaredSize(item.src, item.width, item.height, where);
+  } else {
+    // An mp4's own header is not read here; its poster is the same frame at a
+    // smaller size, so matching aspect ratios catches a video regenerated at a
+    // different shape.
+    assertDeclaredAspect(item.poster as string, item.width / item.height, `${where}.poster`);
+  }
   if (typeof raw.caption === 'string') item.caption = raw.caption;
   if (raw.frame === true) item.frame = true;
   return item;
