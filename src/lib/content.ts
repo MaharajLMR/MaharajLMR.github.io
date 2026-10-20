@@ -75,6 +75,7 @@ function media(value: unknown, where: string): MediaItem {
   if (typeof raw.poster === 'string') item.poster = assetExists(raw.poster, `${where}.poster`);
   if (type === 'video' && !item.poster) fail(where, 'a video needs a poster frame');
   if (typeof raw.caption === 'string') item.caption = raw.caption;
+  if (raw.frame === true) item.frame = true;
   return item;
 }
 

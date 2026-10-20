@@ -32,7 +32,7 @@
         },
         {
           "decision": "Port the traffic manager to C++17 behind pybind11, with integer node ids and flat arrays.",
-          "why": "Python planning cost 4.6 ms on a 1,600-junction graph, which is too slow to run every tick for every robot. The first port kept string keys in std::map and was only 1.5x faster; integer ids made it ~55x. A parity test runs both versions through the same random scenarios so they cannot drift apart."
+          "why": "Python planning cost 4.6 ms on a 1,600-junction graph, which is too slow to run every tick for every robot. The first port kept string keys in std::map and was only 1.5× faster; integer ids made it about 55×. A parity test runs both versions through the same random scenarios so they cannot drift apart."
         },
         {
           "decision": "A robot only accepts an order if its battery covers pick, drop and the trip to the nearest charger with 10 % to spare.",
@@ -93,8 +93,8 @@
         {
           "label": "Route planning, C++ vs Python",
           "value": "55",
-          "unit": "x faster",
-          "context": "82 us against 4,562 us on a 1,600-junction graph; 53x at 100 junctions. Decisions parity-tested as identical.",
+          "unit": "× faster",
+          "context": "82 µs against 4,562 µs on a 1,600-junction graph; 53× at 100 junctions. Decisions parity-tested as identical.",
           "headline": true
         },
         {
@@ -126,7 +126,7 @@
           "label": "Deliveries in a 10-minute Gazebo run",
           "value": "9",
           "unit": "",
-          "context": "Five deadlocks resolved, five self-chosen charge trips, zero navigation failures, one order buffered through an 85 s WMS outage, at about 0.4x real time."
+          "context": "Five deadlocks resolved, five self-chosen charge trips, zero navigation failures, one order buffered through an 85 s WMS outage, at about 0.4× real time."
         },
         {
           "label": "AMCL position error after a 14 m drive",
@@ -149,7 +149,7 @@
           "fix": "Every re-route now drops all claims except the spot the robot is physically on."
         },
         {
-          "what": "The first C++ port was only 1.5x faster than Python because it looked nodes up by string and rebuilt the blocked set on every call.",
+          "what": "The first C++ port was only 1.5× faster than Python because it looked nodes up by string and rebuilt the blocked set on every call.",
           "fix": "Integer node ids in flat arrays, ids assigned alphabetically so Dijkstra tie-breaks match the Python reference exactly."
         },
         {
@@ -201,7 +201,7 @@
             "type": "image",
             "src": "/media/resilient-agv-fleet/traffic_speed.webp",
             "alt": "Route planning time, Python against C++, over graph size",
-            "caption": "Route planning time against graph size. The C++ port holds about 55x over the Python reference it is parity-tested against.",
+            "caption": "Route planning time against graph size. The C++ port holds about 55× over the Python reference it is parity-tested against.",
             "width": 1139,
             "height": 638
           },
@@ -219,7 +219,8 @@
             "alt": "Deliveries over time in the ten-minute Gazebo run",
             "caption": "The ten-minute Gazebo run, including the WMS outage in the middle.",
             "width": 1040,
-            "height": 416
+            "height": 416,
+            "frame": true
           },
           {
             "type": "image",
@@ -227,7 +228,8 @@
             "alt": "Battery level of five AGVs over the run",
             "caption": "Five charge trips the robots decided on themselves.",
             "width": 1040,
-            "height": 416
+            "height": 416,
+            "frame": true
           }
         ]
       },
@@ -303,7 +305,7 @@
             "title": "Input",
             "items": [
               "5 potentiometer knobs",
-              "2x ADS1115 over I2C",
+              "2× ADS1115 over I2C",
               "Web HMI on :8000 (sliders, teach list, stop)"
             ]
           },
@@ -434,7 +436,8 @@
             "alt": "Web HMI with sliders, a side and top drawing of the arm, and a teach list",
             "caption": "The HMI serves virtual knobs, a live side and top drawing, a stop button, the keep-gripper-vertical toggle, and the teach list.",
             "width": 1000,
-            "height": 1250
+            "height": 1250,
+            "frame": true
           },
           {
             "type": "image",
@@ -442,7 +445,8 @@
             "alt": "Reachable workspace of the arm with the gripper held vertical",
             "caption": "Holding the gripper level leaves one curve, which is why the tray and chuck radii are not free choices.",
             "width": 1210,
-            "height": 550
+            "height": 550,
+            "frame": true
           },
           {
             "type": "image",
@@ -450,7 +454,8 @@
             "alt": "Actuator length, moment arm and push force against boom angle",
             "caption": "Stroke and force against boom angle: 387 mm of travel and 140 N peak push with a 0.3 kg part.",
             "width": 1100,
-            "height": 440
+            "height": 440,
+            "frame": true
           }
         ]
       },
@@ -466,7 +471,7 @@
     {
       "slug": "delta-parallel-kinematics",
       "title": "Delta and Stewart Parallel Kinematics",
-      "tagline": "Closed-form delta kinematics, 0.2 microseconds per solve",
+      "tagline": "Closed-form delta kinematics, 0.2 µs per solve",
       "category": "Robotics & Control",
       "featured": true,
       "rank": 3,
@@ -483,7 +488,7 @@
       "approach": [
         {
           "decision": "Solve the inverse kinematics in closed form with a half-angle substitution.",
-          "why": "A cos(t) + B sin(t) = C becomes a quadratic in tan(t/2). It is exact and about 480x faster than scipy's fsolve, and a negative discriminant means the target is genuinely unreachable, so the solver throws instead of returning something plausible."
+          "why": "A cos(t) + B sin(t) = C becomes a quadratic in tan(t/2). It is exact and about 480× faster than scipy's fsolve, and a negative discriminant means the target is genuinely unreachable, so the solver throws instead of returning something plausible."
         },
         {
           "decision": "Compute forward kinematics as the intersection of three spheres.",
@@ -544,8 +549,8 @@
         {
           "label": "Inverse kinematics per call",
           "value": "0.21",
-          "unit": "microseconds",
-          "context": "C++17 at -O2 over 100,000 random targets on a Ryzen 7 3750H. scipy fsolve takes 100.1 us on the same points: 481x. The analytical solver in Python is 6.2 us, so most of the win is the closed form, not the language.",
+          "unit": "µs",
+          "context": "C++17 at -O2 over 100,000 random targets on a Ryzen 7 3750H. scipy fsolve takes 100.1 µs on the same points: 481×. The analytical solver in Python is 6.2 µs, so most of the win is the closed form, not the language.",
           "headline": true
         },
         {
@@ -636,7 +641,7 @@
             "type": "image",
             "src": "/media/delta-parallel-kinematics/solver_benchmark.webp",
             "alt": "Solve time distribution for the analytical and numerical solvers",
-            "caption": "Closed form against scipy fsolve on the same 1,000 targets: 6.2 us in Python, 0.21 us in C++, 100.1 us numerical.",
+            "caption": "Closed form against scipy fsolve on the same 1,000 targets: 6.2 µs in Python, 0.21 µs in C++, 100.1 µs numerical.",
             "width": 1363,
             "height": 567
           },
@@ -646,7 +651,8 @@
             "alt": "Point cloud of the reachable delta workspace",
             "caption": "47.7 % of the sampled cube is reachable; the shape is what the joint limits leave.",
             "width": 1600,
-            "height": 574
+            "height": 574,
+            "frame": true
           },
           {
             "type": "image",
@@ -654,7 +660,8 @@
             "alt": "Jacobian condition number across an XY slice of the workspace",
             "caption": "Condition number across the working slice: 1.45 at centre, none above 100.",
             "width": 1600,
-            "height": 730
+            "height": 730,
+            "frame": true
           },
           {
             "type": "image",
@@ -662,7 +669,8 @@
             "alt": "Position, velocity, acceleration and jerk for trapezoidal and minimum-jerk profiles",
             "caption": "Same 5 s cycle, 71.9 % less peak jerk.",
             "width": 1600,
-            "height": 1579
+            "height": 1579,
+            "frame": true
           },
           {
             "type": "image",
@@ -670,7 +678,8 @@
             "alt": "Reachable workspace of the six-leg Stewart platform",
             "caption": "The 6-UPS Stewart platform: 23.0 % of sampled poses reachable, 24 degrees of tilt.",
             "width": 1600,
-            "height": 529
+            "height": 529,
+            "frame": true
           }
         ]
       },

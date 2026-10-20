@@ -15,6 +15,8 @@ export type MediaItem = {
   poster?: string;
   alt: string;
   caption?: string;
+  /** A figure with a solid white background: frame it so it reads as a plate. */
+  frame?: boolean;
   width: number;
   height: number;
 };

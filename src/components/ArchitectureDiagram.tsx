@@ -49,7 +49,26 @@ export default function ArchitectureDiagram({ stages, title }: Props) {
   });
 
   return (
-    <figure className="overflow-x-auto">
+    <figure>
+      {/* Below the small breakpoint the same stages are a list: an SVG this wide
+          would either scroll sideways or shrink past reading size. */}
+      <ol className="space-y-4 lg:hidden">
+        {stages.map((stage, i) => (
+          <li key={stage.title} className="rounded-card border border-line p-5">
+            <p className="text-small font-semibold text-accent">
+              {i + 1}. {stage.title}
+            </p>
+            <ul className="mt-3 space-y-2">
+              {stage.items.map((item) => (
+                <li key={item} className="flex gap-3 text-small text-ink-secondary">
+                  <span aria-hidden="true" className="mt-[0.55em] h-1 w-1 shrink-0 rounded-full bg-accent" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ol>
       <svg
         viewBox={`0 0 ${WIDTH} ${height}`}
         width={WIDTH}
@@ -58,7 +77,7 @@ export default function ArchitectureDiagram({ stages, title }: Props) {
         aria-label={`Architecture of ${title}: ${stages
           .map((s) => `${s.title} — ${s.items.join(', ')}`)
           .join('; then ')}`}
-        className="h-auto w-full min-w-[640px]"
+        className="hidden h-auto w-full lg:block"
       >
         <defs>
           <marker id="arrow-down" viewBox="0 0 8 8" refX="4" refY="7" markerWidth="8" markerHeight="8" orient="0">

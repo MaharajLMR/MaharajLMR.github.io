@@ -22,7 +22,7 @@ export default function Media({ item, priority = false, className = '', rounded 
     return <VideoPlayer item={item} className={shape} />;
   }
 
-  return (
+  const image = (
     // eslint-disable-next-line @next/next/no-img-element -- pre-optimised WebP, static export
     <img
       className={shape}
@@ -36,4 +36,8 @@ export default function Media({ item, priority = false, className = '', rounded 
       decoding="async"
     />
   );
+
+  if (!item.frame) return image;
+
+  return <span className="block rounded-card bg-white p-3 sm:p-5">{image}</span>;
 }
