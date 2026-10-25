@@ -54,13 +54,13 @@ export default function ArchitectureDiagram({ stages, title }: Props) {
           would either scroll sideways or shrink past reading size. */}
       <ol className="space-y-4 lg:hidden">
         {stages.map((stage, i) => (
-          <li key={stage.title} className="rounded-card border border-line p-5">
-            <p className="text-small font-semibold text-accent">
-              {i + 1}. {stage.title}
+          <li key={stage.title} className="border border-line p-5">
+            <p className="label text-accent">
+              {String(i + 1).padStart(2, '0')} {stage.title}
             </p>
             <ul className="mt-3 space-y-2">
               {stage.items.map((item) => (
-                <li key={item} className="flex gap-3 text-small text-ink-secondary">
+                <li key={item} className="flex gap-3 text-small text-muted">
                   <span aria-hidden="true" className="mt-[0.55em] h-1 w-1 shrink-0 rounded-full bg-accent" />
                   {item}
                 </li>
@@ -81,25 +81,25 @@ export default function ArchitectureDiagram({ stages, title }: Props) {
       >
         <defs>
           <marker id="arrow-down" viewBox="0 0 8 8" refX="4" refY="7" markerWidth="8" markerHeight="8" orient="0">
-            <path d="M0 0 L4 8 L8 0" fill="none" stroke="var(--border)" strokeWidth="1.4" />
+            <path d="M0 0 L4 8 L8 0" fill="none" stroke="var(--line)" strokeWidth="1.4" />
           </marker>
         </defs>
 
         {placed.map((row, i) => {
           let lineIndex = 0;
           return (
-            <g key={row.stage.title}>
+            <g key={row.stage.title.toUpperCase()}>
               <rect
                 x="0"
                 y={row.top}
                 width={WIDTH}
                 height={row.height}
-                rx="14"
+                rx="4"
                 fill="var(--surface)"
-                stroke="var(--border)"
+                stroke="var(--line)"
               />
-              <text x={PAD_X} y={row.top + BOX_PAD_Y + 15} fill="var(--accent)" fontSize="15" fontWeight="600">
-                {row.stage.title}
+              <text x={PAD_X} y={row.top + BOX_PAD_Y + 15} fill="var(--accent)" fontSize="12" fontWeight="500" letterSpacing="1.6" fontFamily="var(--font-mono)">
+                {row.stage.title.toUpperCase()}
               </text>
               {row.lines.map((lines, itemIndex) =>
                 lines.map((line, j) => {
@@ -110,7 +110,7 @@ export default function ArchitectureDiagram({ stages, title }: Props) {
                       {j === 0 ? (
                         <circle cx={TITLE_W + 4} cy={dy - 5} r="2.5" fill="var(--accent)" opacity="0.6" />
                       ) : null}
-                      <text x={TITLE_W + 18} y={dy} fill="var(--text-secondary)" fontSize="14.5">
+                      <text x={TITLE_W + 18} y={dy} fill="var(--muted)" fontSize="14.5" fontFamily="var(--font-sans)">
                         {line}
                       </text>
                     </g>
@@ -123,7 +123,7 @@ export default function ArchitectureDiagram({ stages, title }: Props) {
                   y1={row.top + row.height + 4}
                   x2={TITLE_W / 2}
                   y2={row.top + row.height + GAP - 6}
-                  stroke="var(--border)"
+                  stroke="var(--line)"
                   strokeWidth="1.5"
                   markerEnd="url(#arrow-down)"
                 />

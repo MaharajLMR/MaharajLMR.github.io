@@ -202,16 +202,16 @@
             "src": "/media/resilient-agv-fleet/traffic_speed.webp",
             "alt": "Route planning time, Python against C++, over graph size",
             "caption": "Route planning time against graph size. The C++ port holds about 55× over the Python reference it is parity-tested against.",
-            "width": 1139,
-            "height": 638
+            "width": 1136,
+            "height": 636
           },
           {
             "type": "image",
             "src": "/media/resilient-agv-fleet/fleet_scaling.webp",
             "alt": "Throughput and waiting share against fleet size",
             "caption": "Throughput flattens as robots are added: at five, 31 % of their time is spent waiting for each other.",
-            "width": 1203,
-            "height": 647
+            "width": 1201,
+            "height": 645
           },
           {
             "type": "image",
@@ -634,7 +634,7 @@
           "alt": "Animated delta robot tracing a pick-and-place path with its three arms",
           "caption": "Kinematic animation driven by the C++ solver. No Gazebo run has been recorded yet.",
           "width": 1000,
-          "height": 800
+          "height": 626
         },
         "gallery": [
           {
@@ -642,8 +642,8 @@
             "src": "/media/delta-parallel-kinematics/solver_benchmark.webp",
             "alt": "Solve time distribution for the analytical and numerical solvers",
             "caption": "Closed form against scipy fsolve on the same 1,000 targets: 6.2 µs in Python, 0.21 µs in C++, 100.1 µs numerical.",
-            "width": 1363,
-            "height": 567
+            "width": 1353,
+            "height": 565
           },
           {
             "type": "image",

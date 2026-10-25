@@ -8,7 +8,9 @@ import Skills from '@/components/Skills';
 import type { Tone } from '@/components/Section';
 import { featuredProjects, moreProjects, site } from '@/lib/content';
 
-const TONES: Tone[] = ['light', 'alt', 'dark', 'light', 'alt', 'dark'];
+/** Bands alternate paper and stone, split by a hairline. Only the hero and the
+ *  contact band go dark, so the page opens and closes on the same note. */
+const TONES: Tone[] = ['light', 'alt'];
 
 export default function Home() {
   const [first, ...rest] = featuredProjects;
@@ -18,9 +20,14 @@ export default function Home() {
     <>
       <Hero site={site} backdrop={site.heroBackdrop} />
       <div id="work">
-        <ProjectBand project={first} tone={TONES[0] as Tone} pinned />
+        <ProjectBand project={first} tone="light" index={1} pinned />
         {rest.map((project, i) => (
-          <ProjectBand key={project.slug} project={project} tone={TONES[(i + 1) % TONES.length] as Tone} />
+          <ProjectBand
+            key={project.slug}
+            project={project}
+            tone={TONES[(i + 1) % TONES.length] as Tone}
+            index={i + 2}
+          />
         ))}
       </div>
       <MoreWork items={moreProjects} />

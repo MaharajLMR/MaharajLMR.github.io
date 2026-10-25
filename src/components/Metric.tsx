@@ -20,7 +20,7 @@ function useCountUp(value: string, start: boolean): string {
       return;
     }
     const controls = animate(0, numeric, {
-      duration: 1.2,
+      duration: 1.1,
       ease: [0.16, 1, 0.3, 1],
       onUpdate: (latest) => setShown(latest.toFixed(decimals)),
       onComplete: () => setShown(value),
@@ -38,16 +38,12 @@ export default function Metric({ value, unit, label, context }: Props) {
 
   return (
     <div ref={ref}>
-      <p className="text-metric tabular">
+      <p className="tabular font-mono text-metric">
         {shown}
-        {unit ? (
-          <span className="ml-2 whitespace-nowrap text-[0.4em] font-normal tracking-normal text-ink-secondary">
-            {unit}
-          </span>
-        ) : null}
+        {unit ? <span className="ml-1.5 text-[0.36em] font-normal tracking-normal text-muted">{unit}</span> : null}
       </p>
-      <p className="mt-2 text-small font-medium">{label}</p>
-      {context ? <p className="mt-1 max-w-[34ch] text-small text-ink-secondary">{context}</p> : null}
+      <p className="label mt-4 text-ink">{label}</p>
+      {context ? <p className="mt-2 max-w-[36ch] text-small text-muted">{context}</p> : null}
     </div>
   );
 }

@@ -9,11 +9,11 @@ type Props = {
 };
 
 const BASE =
-  'inline-flex min-h-[44px] items-center justify-center rounded-full px-6 text-[17px] transition-colors duration-200';
+  'inline-flex min-h-[46px] items-center justify-center rounded-chip px-5 text-small font-medium transition-colors duration-200';
 
 const VARIANT = {
-  solid: 'bg-accent text-white hover:brightness-110',
-  outline: 'border border-current text-accent hover:bg-accent/10',
+  solid: 'bg-accent text-paper hover:brightness-[1.08]',
+  outline: 'border border-line text-ink hover:border-ink',
   text: 'px-0 text-accent hover:underline underline-offset-4',
 };
 

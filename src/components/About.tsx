@@ -1,49 +1,45 @@
+import Eyebrow from './Eyebrow';
 import Reveal from './Reveal';
 import Section from './Section';
 import type { Site } from '@/lib/types';
 
 export default function About({ site }: { site: Site }) {
   return (
-    <Section id="about" tone="light" labelledBy="about-title">
-      <div className="grid gap-10 md:grid-cols-[220px_1fr] md:gap-12">
+    <Section id="about" tone="alt" labelledBy="about-title">
+      <div className="grid gap-10 md:grid-cols-[1fr_1.6fr] md:gap-16">
         <Reveal>
-          <h2 id="about-title" className="text-h2">
+          <Eyebrow index={8}>Who</Eyebrow>
+          <h2 id="about-title" className="mt-6 text-h2">
             About
           </h2>
         </Reveal>
         <div>
           {site.bio.map((paragraph, i) => (
-            <Reveal key={paragraph.slice(0, 24)} delay={Math.min(i, 3) * 0.08}>
-              <p className="mt-6 max-w-prose text-body text-ink-secondary first:mt-0">{paragraph}</p>
+            <Reveal key={paragraph.slice(0, 24)} delay={Math.min(i, 3) * 0.06}>
+              <p className="mt-6 max-w-prose text-body text-muted first:mt-0">{paragraph}</p>
             </Reveal>
           ))}
-          <Reveal delay={0.24}>
-            <dl className="mt-12 grid gap-8 sm:grid-cols-3">
+          <Reveal delay={0.2}>
+            <dl className="mt-14 grid gap-8 border-t border-line pt-10 sm:grid-cols-3">
               <div>
-                <dt className="text-small font-semibold uppercase tracking-[0.14em] text-accent">
-                  Education
-                </dt>
+                <dt className="label text-accent">Education</dt>
                 {site.education.map((item) => (
-                  <dd key={item.degree} className="mt-3 text-body text-ink-secondary">
+                  <dd key={item.degree} className="mt-4 text-small text-muted">
                     {item.degree}
                     <br />
                     {item.institution}
                     <br />
-                    {item.period} · {item.detail}
+                    <span className="tabular font-mono">{item.period}</span>, {item.detail}
                   </dd>
                 ))}
               </div>
               <div>
-                <dt className="text-small font-semibold uppercase tracking-[0.14em] text-accent">
-                  Based in
-                </dt>
-                <dd className="mt-3 text-body text-ink-secondary">{site.location}</dd>
+                <dt className="label text-accent">Based in</dt>
+                <dd className="mt-4 text-small text-muted">{site.location}</dd>
               </div>
               <div>
-                <dt className="text-small font-semibold uppercase tracking-[0.14em] text-accent">
-                  Looking for
-                </dt>
-                <dd className="mt-3 text-body text-ink-secondary">{site.lookingFor}</dd>
+                <dt className="label text-accent">Looking for</dt>
+                <dd className="mt-4 text-small text-muted">{site.lookingFor}</dd>
               </div>
             </dl>
           </Reveal>

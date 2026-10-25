@@ -1,52 +1,60 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * Apple-inspired token set. Every colour is a CSS variable so the same utility
- * works in light and dark mode; the raw hexes live in globals.css.
+ * Paper and ink. Instrument Serif for display, Geist for everything UI, Geist
+ * Mono for anything numeric or label-shaped. Colours are CSS variables so one
+ * utility covers light and dark; the hexes live in globals.css.
  */
 const config: Config = {
   content: ['./src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
+        paper: 'var(--paper)',
         surface: 'var(--surface)',
-        'surface-alt': 'var(--surface-alt)',
-        'surface-dark': '#000000',
-        ink: 'var(--text)',
-        'ink-secondary': 'var(--text-secondary)',
-        line: 'var(--border)',
+        'surface-alt': 'var(--alt)',
+        ink: 'var(--ink)',
+        'ink-secondary': 'var(--muted)',
+        muted: 'var(--muted)',
+        line: 'var(--line)',
         accent: 'var(--accent)',
-        'accent-on-dark': '#2997FF',
+        'accent-soft': 'var(--accent-soft)',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'Georgia', 'serif'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       fontSize: {
-        display: ['clamp(2.75rem, 7.2vw, 5rem)', { lineHeight: '1.05', letterSpacing: '-0.03em', fontWeight: '600' }],
-        h1: ['clamp(2.25rem, 5vw, 3.5rem)', { lineHeight: '1.07', letterSpacing: '-0.02em', fontWeight: '600' }],
-        h2: ['clamp(2rem, 3.6vw, 2.5rem)', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '600' }],
-        h3: ['clamp(1.5rem, 2.2vw, 1.75rem)', { lineHeight: '1.15', letterSpacing: '-0.01em', fontWeight: '600' }],
-        tagline: ['clamp(1.1875rem, 1.6vw, 1.3125rem)', { lineHeight: '1.38', fontWeight: '400' }],
-        body: ['1.0625rem', { lineHeight: '1.5' }],
-        small: ['0.875rem', { lineHeight: '1.45' }],
-        metric: ['clamp(2.75rem, 5vw, 4rem)', { lineHeight: '1', letterSpacing: '-0.02em', fontWeight: '600' }],
+        display: ['clamp(2.6rem, 7vw, 5.25rem)', { lineHeight: '0.98', letterSpacing: '-0.02em', fontWeight: '400' }],
+        h1: ['clamp(2.1rem, 4.6vw, 3.4rem)', { lineHeight: '1.04', letterSpacing: '-0.02em', fontWeight: '400' }],
+        h2: ['clamp(1.75rem, 3vw, 2.4rem)', { lineHeight: '1.08', letterSpacing: '-0.015em', fontWeight: '400' }],
+        h3: ['clamp(1.25rem, 1.8vw, 1.5rem)', { lineHeight: '1.2', letterSpacing: '-0.01em', fontWeight: '500' }],
+        lede: ['clamp(1.125rem, 1.5vw, 1.3125rem)', { lineHeight: '1.45', fontWeight: '400' }],
+        tagline: ['clamp(1.125rem, 1.5vw, 1.3125rem)', { lineHeight: '1.45', fontWeight: '400' }],
+        body: ['1.0625rem', { lineHeight: '1.55' }],
+        small: ['0.9375rem', { lineHeight: '1.5' }],
+        micro: ['0.75rem', { lineHeight: '1.3', letterSpacing: '0.14em' }],
+        metric: ['clamp(2.4rem, 4.4vw, 3.5rem)', { lineHeight: '0.95', letterSpacing: '-0.03em', fontWeight: '400' }],
       },
       maxWidth: {
-        content: '1080px',
-        prose: '680px',
+        content: '1120px',
+        prose: '68ch',
       },
       spacing: {
-        band: '7.5rem',
-        'band-sm': '4.5rem',
+        band: '8.5rem',
+        'band-sm': '5rem',
       },
       borderRadius: {
-        card: '18px',
+        chip: '2px',
+        card: '10px',
       },
       boxShadow: {
-        card: '0 18px 40px -18px rgb(0 0 0 / 0.22)',
+        card: '0 1px 2px rgb(0 0 0 / 0.04)',
+        lift: '0 12px 32px -20px rgb(0 0 0 / 0.30)',
       },
       transitionTimingFunction: {
-        apple: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        out: 'cubic-bezier(0.16, 1, 0.3, 1)',
       },
     },
   },

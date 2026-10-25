@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 export type Tone = 'light' | 'alt' | 'dark';
 
 const TONE_CLASS: Record<Tone, string> = {
-  light: 'bg-surface text-ink',
-  alt: 'bg-surface-alt text-ink',
+  light: 'bg-paper text-ink border-t border-line',
+  alt: 'bg-surface-alt text-ink border-t border-line',
   dark: 'band-dark',
 };
 
@@ -17,7 +17,7 @@ type Props = {
   full?: boolean;
 };
 
-/** One full-width band. Content is centred at 1080px unless `full` is set. */
+/** One full-width band. Content sits in a 1120px column unless `full` is set. */
 export default function Section({ id, tone = 'light', children, className = '', labelledBy, full }: Props) {
   return (
     <section

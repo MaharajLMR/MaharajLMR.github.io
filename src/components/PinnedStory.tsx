@@ -18,11 +18,11 @@ export default function PinnedStory({ media, steps }: Props) {
       </div>
       <div>
         {steps.map((step, i) => (
-          <Reveal key={step.label} delay={i * 0.08}>
+          <Reveal key={step.label} delay={i * 0.06}>
             <div className="flex flex-col justify-center border-t border-line py-10 first:border-t-0 first:pt-0 md:min-h-[62svh] md:border-t-0 md:py-0">
-              <p className="text-small uppercase tracking-[0.16em] text-accent">{step.label}</p>
-              <h3 className="mt-3 text-h3">{step.title}</h3>
-              <p className="mt-4 max-w-prose text-body text-ink-secondary">{step.body}</p>
+              <p className="label text-accent">{step.label}</p>
+              <h3 className="mt-4 text-h3">{step.title}</h3>
+              <p className="mt-4 max-w-prose text-body text-muted">{step.body}</p>
             </div>
           </Reveal>
         ))}

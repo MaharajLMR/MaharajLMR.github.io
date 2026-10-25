@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 function Heading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mt-10 border-b border-line pb-2 text-small font-semibold uppercase tracking-[0.14em] text-accent print:mt-6">
+    <h2 className="label mt-12 border-b border-line pb-3 text-accent print:mt-6">
       {children}
     </h2>
   );
@@ -38,8 +38,8 @@ export default function Resume() {
       <div className="mx-auto w-full max-w-[820px] px-6 py-16 text-ink print:px-0 print:py-0 print:text-black">
         <header>
           <h1 className="text-h1">{site.name}</h1>
-          <p className="mt-2 text-tagline text-ink-secondary">{site.roleLine}</p>
-          <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-small text-ink-secondary">
+          <p className="mt-2 text-lede text-muted">{site.roleLine}</p>
+          <p className="label mt-6 flex flex-wrap gap-x-5 gap-y-2 text-muted">
             <a className="text-accent" href={`mailto:${site.email}`}>
               {site.email}
             </a>
@@ -53,14 +53,14 @@ export default function Resume() {
           </p>
           <p className="mt-6 flex gap-4 print:hidden">
             <a
-              className="inline-flex min-h-[44px] items-center rounded-full bg-accent px-6 text-[17px] text-white"
+              className="inline-flex min-h-[46px] items-center rounded-chip bg-accent px-5 text-small font-medium text-white"
               href={asset(site.resumePdf)}
               download=""
             >
               Download PDF
             </a>
             <Link
-              className="inline-flex min-h-[44px] items-center rounded-full border border-current px-6 text-[17px] text-accent"
+              className="inline-flex min-h-[46px] items-center rounded-chip border border-line px-5 text-small font-medium hover:border-ink"
               href="/"
             >
               Back to work
@@ -73,8 +73,8 @@ export default function Resume() {
           <p key={item.degree} className="mt-3 text-body">
             <span className="font-medium">{item.degree}</span>, {item.institution}
             <br />
-            <span className="text-ink-secondary">
-              {item.period} · {item.detail}
+            <span className="text-muted">
+              <span className="tabular font-mono">{item.period}</span>, {item.detail}
             </span>
           </p>
         ))}
@@ -86,8 +86,8 @@ export default function Resume() {
               <p className="text-body font-medium">
                 {item.role} — {item.org}
               </p>
-              <p className="text-small text-ink-secondary">{item.period}</p>
-              <p className="mt-1 text-body text-ink-secondary">{item.detail}</p>
+              <p className="label mt-1 tabular text-muted">{item.period}</p>
+              <p className="mt-1 text-body text-muted">{item.detail}</p>
             </li>
           ))}
         </ul>
@@ -97,17 +97,18 @@ export default function Resume() {
           {highlights.map((item) => (
             <li key={item.slug}>
               <p className="text-body font-medium">
-                {item.title} <span className="font-normal text-ink-secondary">· {item.stack}</span>
+                {item.title}
+                <span className="label ml-3 font-normal text-muted">{item.stack}</span>
               </p>
-              <p className="mt-1 text-body text-ink-secondary">{item.line}</p>
-              <p className="mt-1 text-body text-ink-secondary">{item.metric}</p>
+              <p className="mt-1 text-body text-muted">{item.line}</p>
+              <p className="mt-1 text-body text-muted">{item.metric}</p>
               <p className="mt-1 text-small">
                 <Link className="text-accent" href={`/work/${item.slug}/`}>
                   Case study
                 </Link>
                 {item.repo ? (
                   <>
-                    {' · '}
+                    <span className="px-2 text-line">|</span>
                     <a className="text-accent" href={item.repo} target="_blank" rel="noreferrer noopener">
                       {item.repo.replace('https://', '')}
                     </a>
@@ -124,7 +125,7 @@ export default function Resume() {
             <li key={item.title} className="text-body">
               <span className="font-medium">{item.title}</span>
               <br />
-              <span className="text-ink-secondary">{item.detail}</span>
+              <span className="text-muted">{item.detail}</span>
             </li>
           ))}
         </ul>
@@ -134,7 +135,7 @@ export default function Resume() {
           {site.skills.map((group) => (
             <li key={group.group} className="text-body">
               <span className="font-medium">{group.group}:</span>{' '}
-              <span className="text-ink-secondary">{group.items.join(', ')}</span>
+              <span className="text-muted">{group.items.join(', ')}</span>
             </li>
           ))}
         </ul>
@@ -142,7 +143,7 @@ export default function Resume() {
         <Heading>Earlier work</Heading>
         <ul className="mt-3 space-y-2">
           {moreProjects.map((item) => (
-            <li key={item.slug} className="text-body text-ink-secondary">
+            <li key={item.slug} className="text-body text-muted">
               <span className="font-medium text-ink">{item.title}</span> — {item.line}
             </li>
           ))}
